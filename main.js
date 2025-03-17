@@ -45,8 +45,8 @@ d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualizat
         .range([margin.top, height - margin.bottom])
         .padding(0.2);
 
-    let colorScale = d3.scaleSequential(d3.interpolateOranges)
-        .domain([d3.min(data, d => d.min_temperature), d3.max(data, d => d.max_temperature)]);
+    let colorScale = d3.scaleSequential(d3.interpolateSpectral)
+        .domain([d3.max(data, d => d.max_temperature), d3.min(data, d => d.min_temperature)]);
 
     // Append axes
     svg.append("g")
@@ -108,3 +108,31 @@ d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualizat
     // Draw initial matrix
     updateMatrix();
 });
+// modifying the already created SVG element to hold the legend
+const newsvg = d3.select("#legend")
+    .append("svg")
+    .attr("width", 600) // Adjust width as needed
+    .attr("height", 100); // Adjust height as needed
+
+// Define the color scale
+const legendColorScale = d3.scaleLinear()
+    .interpolate(() => d3.interpolateSpectral) // Color interpolation
+    .domain([40, 0]); // Keep domain as [0, 40] for correct labels
+
+// Create a legend using d3-legend
+const legend = d3.legendColor()
+    .shapeWidth(30) // Width of each block in the legend
+    .orient("horizontal") // Horizontal orientation
+    .cells(11) // Number of blocks in the legend
+    // .ascending(true) // Reverse the order of blocks without affecting labels
+    .scale(legendColorScale) // Use the color scale defined above
+	// .labels([0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40])
+	.labels(["Coolest Recorded", "", "", "", "", "", "", "", "", "", "Hottest Recorded"])
+    // .labelFormat(d3.format(".0f")) // Format labels as integers
+    .title("Legend: Unit - Temperature"); // Add a title to the legend
+
+// Append the legend to the SVG
+newsvg.append("g")
+    .attr("class", "legend")
+    .attr("transform", "translate(20,20)") // Position the legend within the SVG
+    .call(legend);
