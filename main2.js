@@ -17,7 +17,6 @@ d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualizat
         d.day = d.date.getDate();  // Extract day
         d.max_temperature = +d.max_temperature;
         d.min_temperature = +d.min_temperature;
-        d.avg_temperature = (d.max_temperature + d.min_temperature) / 2;
     });
 
     // Filter to keep only the last 10 years
@@ -41,10 +40,10 @@ d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualizat
         .range([margin.top, height - margin.bottom])
         .padding(0.2);
 
-	// let colorScale = d3.scaleSequential(d3.interpolateRainbow)
-	// .domain([d3.min(filteredData, d => d.min_temperature), d3.max(filteredData, d => d.max_temperature)]);
-	let colorScale = d3.scaleSequential().domain([40, 0])  // Maps 0°C to violet and 40°C to red
-	.interpolator(d3.interpolateRainbow);
+	let colorScale = d3.scaleSequential(d3.interpolateSpectral)
+	.domain([d3.max(filteredData, d => d.max_temperature), d3.min(filteredData, d => d.min_temperature)]);
+	// .domain([40,0]);
+
 
     // Append axes
     svg.append("g")
@@ -82,8 +81,8 @@ d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualizat
             .attr("fill", d => {
                 let monthData = d.data;
                 if (monthData.length === 0) return "white";
-                let avgTemp = d3.mean(monthData, d => d.avg_temperature);
-                return colorScale(avgTemp);
+                let maxTemp = d3.max(monthData, d => d.max_temperature);
+                return colorScale(maxTemp);
             });
 
         // Draw mini line charts
@@ -113,7 +112,7 @@ d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualizat
                 .datum(minTempData)
                 .attr("d", line)
                 .attr("stroke", "skyblue")
-                .attr("stroke-width", 1)
+                .attr("stroke-width", 1.4)
                 .attr("fill", "none")
                 .style("pointer-events", "none");
 
@@ -121,8 +120,8 @@ d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualizat
             cellSvg.append("path")
                 .datum(maxTempData)
                 .attr("d", line)
-                .attr("stroke", "green")
-                .attr("stroke-width", 1)
+                .attr("stroke", "darkgreen")
+                .attr("stroke-width", 1.4)
                 .attr("fill", "none")
                 .style("pointer-events", "none");
         });
@@ -136,10 +135,8 @@ d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualizat
                 if (d.data.length === 0) return;
                 let maxTemp = d3.max(d.data, d => d.max_temperature);
                 let minTemp = d3.min(d.data, d => d.min_temperature);
-                let avgTemp = d3.mean(d.data, d => d.avg_temperature);
                 tooltip.style("visibility", "visible")
-                    .html(`Year: ${d.year}, Month: ${d3.timeFormat("%B")(new Date(2000, d.month - 1, 1))}<br>
-                           Max Temp: ${maxTemp}°C <br> Min Temp: ${minTemp}°C <br> Avg Temp: ${avgTemp.toFixed(2)}°C`)
+                    .html(`Date: ${d.year}-${d.month}, max: ${maxTemp} min: ${minTemp} `)
                     .style("left", `${event.pageX + 10}px`)
                     .style("top", `${event.pageY + 10}px`);
             })
