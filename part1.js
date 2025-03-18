@@ -10,11 +10,14 @@ const svg = d3.select("body").append("svg")
 // selected media button for temperature type (default to max)
 let selectedTempType = "max";
 
+const parseDate = d3.timeParse("%Y-%m-%d");
+
 // loading CSV and processing data
 d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualization-Assignment2/refs/heads/main/temperature_daily.csv").then(data => {
 	// converting date and temperature values
 	data.forEach(d => {
-		d.date = new Date(d.date);
+		// d.date = new Date(d.date);
+		d.date = parseDate(d.date);
 		d.year = d.date.getFullYear();
 		d.month = d.date.getMonth() + 1;  // 1-12
 		d.max_temperature = +d.max_temperature;

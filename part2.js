@@ -10,11 +10,13 @@ const svg = d3.select("body").append("svg")
 // selected media button for temperature type (default to max)
 let selectedTempType = "max";
 
+const parseDate = d3.timeParse("%Y-%m-%d");
 // loading CSV and processing data
 d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualization-Assignment2/main/temperature_daily.csv").then(data => {
 	// converting date and temperature values
 	data.forEach(d => {
-		d.date = new Date(d.date);
+		// d.date = new Date(d.date);
+		d.date = parseDate(d.date);
 		d.year = d.date.getFullYear();
 		d.month = d.date.getMonth() + 1;  // 1-12
 		d.day = d.date.getDate();
@@ -163,12 +165,36 @@ d3.csv("https://raw.githubusercontent.com/xiameng552180/CSCE-679-Data-Visualizat
 			.attr("fill", "transparent")
 			.on("mouseover", (event, d) => {
 				if (d.data.length === 0) return;
-				let maxTemp = d3.max(d.data, d => d.max_temperature);
-				let minTemp = d3.min(d.data, d => d.min_temperature);
-				tooltip.style("visibility", "visible")
-					.html(`date: ${d.year}-${d.month}, max: ${maxTemp} min: ${minTemp}`)
-					.style("left", `${event.pageX + 10}px`)
-					.style("top", `${event.pageY + 10}px`);
+				if (selectedTempType == "max"){
+					// Find the data point with the maximum max_temperature
+					let hottestDataPoint = d3.max(d.data, d => d.max_temperature); 
+					let hottestPoint = d.data.reverse().find(d => d.max_temperature === hottestDataPoint);
+
+					// Extract both max_temperature and min_temperature from that point
+					let maxTemp = hottestPoint.max_temperature;
+					let minTemp = hottestPoint.min_temperature;
+
+					tooltip.style("visibility", "visible")
+						.html(`date: ${d.year}-${d.month}, max: ${maxTemp} min: ${minTemp}`)
+						.style("left", `${event.pageX + 10}px`)
+						.style("top", `${event.pageY + 10}px`);
+
+				} else {
+					// Find the data point with the minimum min_temperature
+					let coldestDataPoint = d3.min(d.data, d => d.min_temperature); 
+					let coldestPoint = d.data.reverse().find(d => d.min_temperature === coldestDataPoint);
+
+					// Extract both max_temperature and min_temperature from that point
+					let maxTemp = coldestPoint.max_temperature;
+					let minTemp = coldestPoint.min_temperature;
+					console.log(maxTemp, minTemp);
+					console.log(d.data);
+
+					tooltip.style("visibility", "visible")
+						.html(`date: ${d.year}-${d.month}, max: ${maxTemp} min: ${minTemp}`)
+						.style("left", `${event.pageX + 10}px`)
+						.style("top", `${event.pageY + 10}px`);
+				}
 			})
 			.on("mouseout", () => tooltip.style("visibility", "hidden"));
 	}
